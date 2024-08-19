@@ -1,14 +1,14 @@
-from django.urls import path
-from recipe import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .viewsets import RecipeViewSet, RecipeCategoryViewSet, RecipeLikeViewSet
 
-app_name = 'recipe'
+app_name = 'recipe' 
+
+router = DefaultRouter()
+router.register(r'recipes', RecipeViewSet)
+router.register(r'categories', RecipeCategoryViewSet)
+router.register(r'likes', RecipeLikeViewSet)
 
 urlpatterns = [
-    path('', views.RecipeListAPIView.as_view(), name="recipe-list"),
-    path('<int:pk>/', views.RecipeAPIView.as_view(), name="recipe-detail"),
-    path('create/', views.RecipeCreateAPIView.as_view(), name="recipe-create"),
-    path('<int:pk>/like/', views.RecipeLikeAPIView.as_view(),
-         name='recipe-like'),
-    path('test-celery/', views.test_celery, name='test_celery'),
-    path('test-celery/long/', views.start_long_running_task, name='test_long_task'),
+    path('', include(router.urls)),
 ]
