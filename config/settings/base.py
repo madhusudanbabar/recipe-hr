@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from decouple import config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,17 +36,23 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': './debug.log',
+            'filename': 'debug.log',
             'formatter': 'verbose'
         },
     },
     'loggers': {
+        '': {  # Root logger
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'recipe': {
             'handlers': ['console', 'file'],
-        }
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     }
 }
-
 
 # Celery config 
 
@@ -55,7 +62,15 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
+CELERY_BEAT_SCHEDULE = {
+    'send-daily-notifications': {
+        'task': 'recipe.tasks.send_daily_notifications',
+        'schedule': crontab(hour=0, minute=0)
+    },
+}
 
+
+DEFAULT_FROM_EMAIL = 'krypton@madhusudan.live'
 
 # Application definition
 
@@ -180,7 +195,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Email config
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.zoho.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = config('EMAIL_USER')
