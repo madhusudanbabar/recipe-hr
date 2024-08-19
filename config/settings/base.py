@@ -1,8 +1,9 @@
 from pathlib import Path
-import os
 from datetime import timedelta
 from decouple import config
 from celery.schedules import crontab
+import sentry_sdk
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +69,17 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0)
     },
 }
+
+sentry_sdk.init(
+    dsn="https://953b845fee09c24ad11e3f5845c5480d@o4507805011738624.ingest.us.sentry.io/4507805013049344",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 
 DEFAULT_FROM_EMAIL = 'krypton@madhusudan.live'
