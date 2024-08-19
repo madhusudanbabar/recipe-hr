@@ -1,7 +1,11 @@
+from django.http import HttpResponse
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from recipe.tasks import add, long_running_task
 
 from .models import Recipe, RecipeLike
 from .serializers import RecipeLikeSerializer, RecipeSerializer
@@ -65,3 +69,12 @@ class RecipeLikeAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+def test_celery(request):
+    result = add.delay(4, 4)
+    return HttpResponse(f"Task result: {result.get(timeout=10)}")
+
+def start_long_running_task(request):
+    task = long_running_task.delay()  # Trigger the Celery task asynchronously
+    return HttpResponse(f"Task is running with ID: {task.id}")
